@@ -3,6 +3,7 @@ import urllib.request as req
 from bs4 import BeautifulSoup as BS
 import abc
 
+
 class SearchEngine:
     __metaclass__ = abc.ABCMeta
 
@@ -27,7 +28,14 @@ class SearchEngine:
         '''
         return
 
+    @abc.abstractmethod
+    def getUrl(self, link):
+        '''
 
+        :param link:
+        :return:
+        '''
+        return
 
 class GoogleSearchEngine(SearchEngine):
 
@@ -89,10 +97,33 @@ class GoogleSearchEngine(SearchEngine):
         pages = []
         print("Scan possible pages")
         for element in foot_element.findAll("a"):
-            if "class" in element.attrs and "style" not in element.attrs:
+            if "class" in element.attrs:
                 pages.append(element.attrs["href"])
 
-        return (pages[-1:])[0]
+        next_link = (pages[-1:])[0]
+        return next_link
 
     def extractLastPage(self, pages):
         return pages[-1:]
+
+    def getUrl(self, link):
+        get_request = self.base + link
+        try:
+            return self.extract(get_request)
+        except:
+            return []
+
+    def extract(self, path):
+        hdr = {'User-Agent': 'Mozilla/5.0'}
+        request = req.Request(path, headers=hdr)
+        value = req.urlopen(request)
+        content = BS(value)
+        return self.linkExtractor(content)
+
+    def linkExtractor(self, content):
+        links = []
+        for link in content.findAll("a"):
+            if "href" in link.attrs:
+                links.append(link.attrs["href"])
+        return links
+
