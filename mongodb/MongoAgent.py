@@ -20,8 +20,9 @@ class MongoAgent:
         print("Start mongo parser!")
         while not eventsourcing.ended or eventsourcing.values_in_queue():
             if eventsourcing.values_in_queue():
-                print("Printing!")
                 event = eventsourcing.pop()
                 self.events.insert_one(event)
+            else:
+                time.sleep(self.sleep_time)
         print("End mongo parser!")
         return True

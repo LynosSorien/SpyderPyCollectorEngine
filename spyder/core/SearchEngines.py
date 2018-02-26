@@ -107,7 +107,11 @@ class GoogleSearchEngine(SearchEngine):
         return pages[-1:]
 
     def getUrl(self, link):
-        get_request = self.base + link
+        index = link.find("http")
+        if index == -1:
+            get_request = self.base + link
+        else:
+            get_request = link[index:]
         try:
             return self.extract(get_request)
         except:
