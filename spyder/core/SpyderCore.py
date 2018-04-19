@@ -1,7 +1,7 @@
 from spyder.core import SearchEngines
 from multiprocessing.dummy import Pool as ThreadPool
 from eventsourcing.EventSourcerHandler import EventSourcerHandler
-from mongodb.MongoAgent import MongoAgent
+from consumers.mongodb.MongoAgent import MongoAgent
 import datetime
 from threading import Thread
 
@@ -9,7 +9,7 @@ class SpyderCore:
 
     def __init__(self, reactive=False, n_threads=2, iterations=2, max_deep=20):
         print("SpyderCore.__init__")
-        print("Maxdeep",max_deep)
+        print("Maxdeep", max_deep)
         self.pool = ThreadPool(n_threads)
         self.iterations = iterations
         self.max_deep = max_deep
@@ -53,6 +53,8 @@ class SpyderCore:
         self.analyze(link)
 
     def analyze(self, link, deep=0, readedLinks=[]):
+        if self.event_sourcer.link_visited(link):
+            return link
         if deep > self.max_deep:
             return link
         links = self.search_engine.getUrl(link)
@@ -78,5 +80,5 @@ class SpyderCore:
                 "extracted_time": datetime.datetime.utcnow()}
 
 
-spyderCore = SpyderCore(max_deep=10, reactive=False)
-content = spyderCore.start("Wikipedia")
+spyderCore = SpyderCore(max_deep=3, reactive=False)
+content = spyderCore.start("DragonBall")

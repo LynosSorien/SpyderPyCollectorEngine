@@ -1,8 +1,9 @@
 from pymongo import MongoClient
+from consumers.Consumer import Consumer
 import time
 
 
-class MongoAgent:
+class MongoAgent(Consumer):
     def __init__(self, sleep_time=0.2):
         self.client = MongoClient("localhost", 27017)
         self.db = None
@@ -26,3 +27,6 @@ class MongoAgent:
                 time.sleep(self.sleep_time)
         print("End mongo parser!")
         return True
+
+    def notify_event(self):
+        return
