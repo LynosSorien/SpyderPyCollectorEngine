@@ -2,6 +2,7 @@ from spyder.core import SearchEngines
 from multiprocessing.dummy import Pool as ThreadPool
 from eventsourcing.EventSourcerHandler import EventSourcerHandler
 from consumers.mongodb.MongoAgent import MongoAgent
+from consumers.mysql.MySQLAgent import MySqlAgent
 import datetime
 from threading import Thread
 
@@ -18,13 +19,15 @@ class SpyderCore:
         self.event_sourcer = EventSourcerHandler()
         self.mongo_agent = MongoAgent()
         self.mongo_agent.startDB()
+        self.mysql_agent = MySqlAgent()
+        self.mysql_agent.startDB()
         self.reactive = reactive
         self.thread = None
         if reactive:
             self.thread = Thread(target=self.mongo_agent.connect_to_eventsourcing, args=(self.event_sourcer, ))
             self.thread.start()
 
-    def start(self, criteria):
+    def start(self, criteria, agent_mongo=False, agent_mysql=False):
         self.criteria = criteria
         content = self.search_engine.search(criteria)
         print("Start event sourcing...")
@@ -39,7 +42,10 @@ class SpyderCore:
         end_scan_time = datetime.datetime.utcnow()
         print("Scanning ended, take", end_scan_time-start_time)
         if not self.reactive:
-            self.mongo_agent.connect_to_eventsourcing(self.event_sourcer)
+            if agent_mongo:
+                self.mongo_agent.connect_to_eventsourcing(self.event_sourcer)
+            elif agent_mysql:
+                self.mysql_agent.connect_to_eventsourcing(self.event_sourcer)
         elif self.thread is not None:
             self.thread.join()
 
@@ -81,4 +87,4 @@ class SpyderCore:
 
 
 spyderCore = SpyderCore(max_deep=3, reactive=False)
-content = spyderCore.start("DragonBall")
+content = spyderCore.start("especies", agent_mysql=True)
