@@ -1,4 +1,4 @@
-
+import MySQLdb
 from consumers.Consumer import Consumer
 import time
 
